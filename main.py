@@ -1,217 +1,109 @@
-﻿using System;
-
-namespace Random_sentance
-{
-    class Program
-    {
-        static void Main(string[] args)
-        {
-            long num;
-            int seed;
-            string ans, text="";
-            int x=0, y=0, z=0, osszeg = 0;
-            int begining=0, previous=0;
-            char[] letter = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' };
-            /*12+, prev:0*/string[] w_thing = { " car", " cat", " ice cream", " building", " house", " freezer", " doll", " art", " computer", " code", " table", " chair", " mouse", " keyboard", " monitor", " processor", " ram", " fruit", " vegetable", " desk", " pen", " pencil", " gun", " death", " paint", " brush", /**/};
-            /*8+, prev:1*/string[] w_do = { " eat", " give", " take", " do", " make", " destroy", " code", " can", " slap", " kick", " leave", " go", " morn", " capture", " run", " walk", " jog", " climb", /**/};
-            /*DONE 12 , prev:2*/string[] w_who = { " I", " you", " he", " she", " it", " they", " them", " her", " his", " me", " this", " that" };
-            /*DONE 7 , prev:3*/string[] w_ask = { "who", "when", "why", "where", "what", "are", "is" };
-            /*DONE 8 */string[] w_end = { ".", "!", "?", "?!", "!?", " :)", "", "...", };
-            /*DONE 9 , prev:4*/string[] w_between = { " a", " an", " is", " the", " with", " at", " on", " in", " are"};
-            //random number
-            Random rs = new Random();
-            seed = rs.Next(-2147483648, 2147483647);
-            Console.Write("Seed? :");
-            ans = Console.ReadLine();
-            if (ans != "")
-            {
-                try
-                {
-                    seed = Convert.ToInt32(ans);
-                }
-                catch
-                {
-                    for (x = 0; x < ans.Length; x++)
-                    {
-                        osszeg += (int)ans[x];
-                    }
-                    seed = osszeg;
-                }
-            }
-            Random r = new Random(seed);
-            num = r.Next(1, 2147483647);
-            Console.WriteLine("SEED:" + seed);
-            Console.WriteLine(num + ", \n");
-            //random text?
-            Console.Write("Rndom? :");
-            ans = Console.ReadLine();
-            //very random
-            if(ans=="y")
-            {
-                num = r.Next(1, 1001);
-                for(x=0;x<num;x++)
-                {
-                    y = r.Next(0, 60);
-                    text += letter[y];
-                }
-            }
+﻿import random as r
 
 
+def unstructured_random(min_len=1, max_len=1000):
+    """""
+    Returns a random number of random letters (and simbols).
+    """
+    text = ""
+    num = r.randint(min_len, max_len)
+    for _ in range(num):
+        text += letters[r.randint(0, len(letters) - 1)]
+    return text
 
 
+def get_next_word(type_pre=0):
+    """""
+    Returns the next random word, and it's type from the previous word type, according to the sentance structure array.
+    """
+    global sentance_structure
+    global words
+    type_num = r.randint(0, len(sentance_structure[type_pre]) - 1)
+    word_type = sentance_structure[type_pre][type_num]
+    word = words[word_type][r.randint(0, len(words[word_type]) - 1)]
+    # input(f"{type_pre} {word_type}: {word}")
+    return word_type, word
 
 
-            //not so random
-            else
-            {
-                //begining word
-                num = r.Next(0, 4);
-                if(num==1)
-                {
-                    y = r.Next(0, w_ask.Length-1);
-                    text += w_ask[y];
-                    if (y == 5 && y == 6)
-                    {
-                        y = r.Next(0, w_who.Length-1);
-                        text += w_who[y];
-                        previous = 2;
-                    }
-                    else
-                        begining = 3;
-                }
-                else if(num==2)
-                {
-                    y = r.Next(0, w_ask.Length-1);
-                    text += w_ask[y];
-                    if (y == 5 || y == 6)
-                    {
-                        y = r.Next(0, w_who.Length-1);
-                        text += w_who[y];
-                        previous = 2;
-                    }
-                    else
-                        begining = 3;
-                }
-                else if(num==3)
-                {
-                    y = r.Next(0, w_who.Length-1);
-                    text += w_who[y];
-                    begining = 2;
-                    previous = 2;
-                }
-                else if (num == 4)
-                {
-                    y = r.Next(0, w_do.Length-1);
-                    text += w_do[y];
-                    begining = 1;
-                    previous = 1;
-                }
-                //sentance
-                /*
-                 *thing=0
-                 *do=1
-                 *who=2
-                 *ask=3
-                 *between=4
-                 *
-                 *STRUCTURE:
-                 *thing-between
-                 *do-thing
-                 *do-between
-                 *who-do
-                 *who-between
-                 *ask-who
-                 *ask-between
-                 *between-who
-                 *between-thing
-                */
-                if (num > 1)
-                {
-                    num = r.Next(1, 101);
-                    for (x = 0; x < num; x++)
-                    {
-                        if(previous==0)
-                        {
-                            y = r.Next(0, 0);
-                            if (y == 0)
-                            {
-                                z = r.Next(0, w_between.Length - 1);
-                                text += w_between[z];
-                                previous = 4;
-                            }
-                        }
-                        else if (previous == 1)
-                        {
-                            y = r.Next(0, 2);
-                            if (y == 0)
-                            {
-                                z = r.Next(0, w_between.Length - 1);
-                                text += w_between[z];
-                                previous = 4;
-                            }
-                            else
-                            {
-                                z = r.Next(0, w_thing.Length - 1);
-                                text += w_thing[z];
-                                previous = 0;
-                            }
-                        }
-                        else if (previous == 2)
-                        {
-                            y = r.Next(0, 2);
-                            if (y == 0)
-                            {
-                                z = r.Next(0, w_between.Length - 1);
-                                text += w_between[z];
-                                previous = 4;
-                            }
-                            else
-                            {
-                                z = r.Next(0, w_do.Length - 1);
-                                text += w_do[z];
-                                previous = 1;
-                            }
-                        }
-                        else if (previous==3)
-                        {
-                            y = r.Next(0, 2);
-                            if (y == 0)
-                            {
-                                z = r.Next(0, w_between.Length - 1);
-                                text += w_between[z];
-                                previous = 4;
-                            }
-                            else
-                            {
-                                z = r.Next(0, w_who.Length - 1);
-                                text += w_who[z];
-                                previous = 2;
-                            }
-                        }
-                        else
-                        {
-                            y = r.Next(0, 1);
-                            if (y == 0)
-                            {
-                                z = r.Next(0, w_who.Length - 1);
-                                text += w_who[z];
-                                previous = 2;
-                            }
-                            else
-                            {
-                                z = r.Next(0, w_thing.Length - 1);
-                                text += w_thing[z];
-                                previous = 0;
-                            }
-                        }
-                    }
-                }
-                //end
-                num = r.Next(0, w_end.Length-1);
-                text += w_end[num];
-            }
-            Console.WriteLine(text);
-            Console.ReadKey();
-        }
-    }
-}
+def structured_sentance(min_len=1, max_len=100):
+    """""
+    Returns a random string that "tries" to match a sentance structure\n
+    A Word length of 1 produces only a punctuation mark. (0 produces nothing)
+    """
+    text = "" 
+    sentance_length = r.randint(min_len, max_len)
+    if sentance_length > 0:
+        if sentance_length > 1:
+            type_pre, word = get_next_word(7)
+            text += word.replace(" ", "").capitalize()
+            for _ in range(sentance_length - 2):
+                type_pre, word = get_next_word(type_pre)
+                text += word
+        text += get_next_word(6)[1]
+    return text
+
+letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ]
+w_thing = [" car", " cat", " ice cream", " building", " house", " freezer", " doll", " art", " computer", " code", " table", " chair", " mouse", " keyboard", " monitor", " processor", " ram", " fruit", " vegetable", " desk", " pen", " pencil", " gun", " death", " paint", " brush"]
+w_do = [" eat", " give", " take", " do", " make", " destroy", " code", " can", " slap", " kick", " leave", " go", " morn", " capture", " run", " walk", " jog", " climb"]
+w_adj = [" cute", " nice", " wrong", " medium", " big", " small", " hairy", " fat", " fast", " slow", " easy", " hard"]
+w_who = [" I", " you", " he", " she", " it", " they", " them", " her", " his", " me", " this", " that"]
+w_ask = [" who", " when", " why", " where", " what", " are", " is"]
+w_end = [".", "!", "?", "?!", "!?", " :)", " :(", " :D", " :C", " XD", "", "..."]
+w_between = [" a", " an", " is", " the", " with", " at", " on", " in", " are", " have"]
+# thing     do      adjective     who      ask     between    end      beginning
+words = [w_thing, w_do, w_adj, w_who, w_ask, w_between, w_end]
+sentance_structure = [[5], [0, 2, 5], [0], [1, 5], [3, 5], [0, 2, 3], [-1], [1, 3, 4, 5]]
+
+# SENTANCE STRUCTURE
+"""""
+    thing   =   0
+    do      =   1
+    adj     =   2
+    who     =   3
+    ask     =   4
+    between =   5
+    (end    =   6)
+    (beggining= 7)
+    
+    STRUCTURE:
+
+    thing:
+        -between
+    
+    do:
+        -thing
+        -adj
+        -between
+
+    adj:
+        -thing
+    
+    who:
+        -do
+        -between
+    
+    ask:
+        -who
+        -between
+    
+    between:
+        -thing
+        -adj
+        -who
+"""
+
+# seed
+seed = r.randint(-1000000000, 1000000000)
+ans = input("Seed?: ")
+if ans != "":
+    seed = int(ans)
+else:
+    print(f"Seed: {seed}")
+r.seed(seed)
+
+ans = input("Random?(Y/N): ")
+# very random
+if ans.upper() == "Y":
+    input(unstructured_random(1, 1000))
+else:   
+    input(structured_sentance(1, 100))
