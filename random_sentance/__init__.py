@@ -138,7 +138,7 @@ def meta_typewriter(texts=[["Example ", False], ["text!\nNewline!", 10]]):
             elif 1 < len(text) < 4:
                 text_repair = [text[0], def_delay, def_delay_type, def_sound]
                 for x in range(1, len(text)):
-                    if type(text[x]) == int:
+                    if type(text[x]) == int or type(text[x]) == float:
                         text_repair[1] = text[x]
                     elif type(text[x]) == bool:
                         text_repair[2] = text[x]
