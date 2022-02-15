@@ -1,9 +1,10 @@
 ﻿"""
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
-It also contains a function for writing text out letter by letter at a specifiable speed, and another function if you want to write out multy-line text at varying speeds easily.
+It also contains a function for writing text out letter by letter at a specifiable speed and sound, and another function if you want to write out multy-line text at varying speeds and/or sounds easily.
 """
-import random as r
+__version__ = 'dev'
 
+import random as r
 
 def unstructured_random(min_len=1, max_len=1000):
     """
@@ -95,52 +96,63 @@ def structured_sentance(min_len=1, max_len=100):
         -who
 """
 
-
-def typewriter(text="", speed=4, is_speed_delay=True):
+def typewriter(text="", delay=4, is_delay_per_letter=True, sound=""):
     """
     Writes out text like a typewriter with end="".\n
     Returns "" so it can be easily inserted into text.\n
-    Speed controlls how long should it wait between writing out two letters in millisecond.\n
-    If is_speed_delay is False, speed is how many seconds it should take to write out the entire text.\n
+    Delay controlls how many millisecond it should wait between writing out two letters.\n
+    If is_delay_per_letter is False, delay is how many seconds it should take to write out the entire text.\n
+    You can also specify a sound that will play every time a letter is printed.
     """
-    import time
-
-    if is_speed_delay:
-        for letter in text:
-            print(letter, end="", flush=True)
-            time.sleep(speed / 1000)
-    else:
-        for letter in text:
-            print(letter, end="", flush=True)
-            time.sleep(speed / len(text))
+    from time import sleep
+    if sound != "":
+        from simpleaudio import WaveObject
+    
+    for letter in text:
+        print(letter, end="", flush=True)
+        if sound != "":
+            WaveObject.from_wave_file(sound).play()
+        if is_delay_per_letter:
+            sleep(delay / 1000)
+        else:
+            sleep(delay / len(text))
     return ""
 
 
-def meta_typewriter(texts=[["Example ", 0.1], ["text!\nNewline!", 2]]):
+def meta_typewriter(texts=[["Example ", False], ["text!\nNewline!", 10]]):
     """
     Writes out multiline texts using the typewriter function.\n
-    Accepts a list of texts that should have different speeds, and/or timing styles.\n
-    [TEXT, SPEED, IS_SPEED_DELAY]\n
-    If speed is not specified it asumes 4.
-    If is_speed_delay is not specified it asumes True.
+    Accepts a list of texts that should have different delays, and/or timing styles.\n
+    [TEXT, DELAY, IS_DELAY_PER_LETTER, SOUND]\n
+    If delay is not specified it asumes 4.\n
+    If is_delay_per_letter is not specified it asumes True.\n
+    If sound is not specified it asumes none.
     """
-    def_speed = 4
+    def_delay = 4
     def_delay_type = True
+    def_sound = ""
     for text in texts:
         if text != []:
             if len(text) == 1:
-                text = [text[0], def_speed, def_delay_type]
-            elif len(text) == 2:
-                if type(text[1]) == int:
-                    text.append(def_delay_type)
-                else:
-                    text = [text[0], def_speed, text[1]]
-            typewriter(text[0], text[1], text[2])
+                text = [text[0], def_delay, def_delay_type, def_sound]
+            elif 1 < len(text) < 4:
+                text_repair = [text[0], def_delay, def_delay_type, def_sound]
+                for x in range(1, len(text)):
+                    if type(text[x]) == int:
+                        text_repair[1] = text[x]
+                    elif type(text[x]) == bool:
+                        text_repair[2] = text[x]
+                    elif type(text[x]) == str:
+                        text_repair[3] = text[x]
+                text = text_repair
+            typewriter(text[0], text[1], text[2], text[3])
         else:
             print("TEXT ERROR!")
 
 
 def default_run():
+    from random import seed
+
     seed = r.randint(-1000000000, 1000000000)
     ans = input("Seed?: ")
     if ans != "":
@@ -151,10 +163,11 @@ def default_run():
 
     ans = input("Random?(Y/N): ")
     if ans.upper() == "Y":
-        input(unstructured_random(1, 1000))
+        typewriter(unstructured_random(1, 1000), 5)
     else:
-        input(structured_sentance(2, 2))
+        typewriter(structured_sentance(1, 100), 5)
+    input()
 
 # -231822330	sentance(2, 2)
 # default_run()
-# meta_typewriter([["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False], ["YOU!!!\n", 1.5, False]])
+# meta_typewriter([["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False], ["YOU!!!\n", 1.5, False, "close.wav"]])
