@@ -12,7 +12,9 @@ setup(
 
     packages=find_packages(),
 
-    install_requires=[
-        'simpleaudio',
-    ],
+    extras_require={
+        'dev': [
+            'simpleaudio',
+        ],
+    },
 )
