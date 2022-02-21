@@ -13,3 +13,7 @@ __pycache__/
 
 # Pip
 *.egg-info
+
+# testing
+enter.wav
+sound.wav
