@@ -2,7 +2,7 @@
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
 It also contains a function for writing text out letter by letter at a specifiable speed and with a custom sound.
 """
-__version__ = '1.3.1.1'
+__version__ = '1.3.2'
 
 from numpy import random as npr
 # exposed for custom seed
@@ -98,29 +98,32 @@ def structured_sentance(min_len=1, max_len=100):
         -who
 """
 
-def _typewriter_line(text="", delay=4, is_delay_per_letter=True, sound=""):
+def _typewriter_line(text="", delay=4, is_delay_per_letter=True, sound="", sound_waits=False):
     """
     Writes out text like a typewriter with end="".\n
     Returns "" so it can be easily inserted into text.\n
     Delay controlls how many millisecond it should wait between writing out two letters.\n
     If is_delay_per_letter is False, delay is how many seconds it should take to write out the entire text.\n
-    You can also specify a sound that will play every time a letter is printed.
+    You can also specify a sound that will play every time a letter is printed, and specify if the function should wait until the sound finishes before writing a new letter.
     """
     from time import sleep
     # sound?
     if sound != "":
         from simpleaudio import WaveObject
     
-    for letter in text:
-        print(letter, end="", flush=True)
-        # sound
-        if sound != "":
-            WaveObject.from_wave_file(sound).play()
-        # delay type
-        if is_delay_per_letter:
-            sleep(delay / 1000)
-        else:
-            sleep(delay / len(text))
+    for x in range(len(text)):
+        print(text[x], end="", flush=True)
+        if x != len(text) - 1:
+            # sound
+            if sound != "":
+                curr_sound = WaveObject.from_wave_file(sound).play()
+                if sound_waits:
+                    curr_sound.wait_done()
+            # delay type
+            if is_delay_per_letter:
+                sleep(delay / 1000)
+            else:
+                sleep(delay / len(text))
     return ""
 
 
@@ -128,13 +131,15 @@ def typewriter(*texts):
     """
     Can write out multiline texts letter by letter. (using the typewriter function)\n
     Accepts n number of lists each contaning a text that can have an int delay, a bool delay type and a string sound name.\n
-    [TEXT, DELAY, IS_DELAY_PER_LETTER, [SOUND_BEGIN, SOUND]]\n
-    (delay=4, is_delay_per_letter=True, sound_begin="", sound="")\n
+    [TEXT, DELAY, IS_DELAY_PER_LETTER, [SOUND_BEGIN, SOUND, SOUND_BEGIN_WAIT, SOUND_WAIT]]\n
+    (delay=4, is_delay_per_letter=True, sound_begin="", sound="", sound_begin_wait=False, sound_wait=False)\n
     Returns "" so it can be inserted into a print.\n
     delay controlls how many millisecond it should wait between writing out two letters.\n
     If is_delay_per_letter is False, delay is how many seconds it should take to write out the entire text.\n
     sound and sound_begin are paths to .wav files. sound_begin will play before the text starts printing out and sound will play every time a letter is printed.\n
-    If the array with the sounds only has one element, the program will asume that it is the sound variable.
+    Both sound variables have a bool that controlls if the function should wait for the sound to finnish playing before continuing.\n
+    If the array with the sounds only has one sound path, the function will asume that it is the sound variable.\n
+    If it only has one bool it asumes that it is for the begin sound variable.
     """
     texts = [x for x in texts]
     # defaults
@@ -142,37 +147,71 @@ def typewriter(*texts):
     def_delay_type = True
     def_sound_begin = ""
     def_sound = ""
+    def_sound_begin_wait = False
+    def_sound_wait = False
     for text in texts:
         # empty
         if text != []:
             # only text
             if len(text) == 1:
-                text = [text[0], def_delay, def_delay_type, [def_sound_begin, def_sound]]
+                text = [text[0], def_delay, def_delay_type, [def_sound_begin, def_sound, def_sound_begin_wait, def_sound_wait]]
             # not all variables
             elif 1 < len(text) < 4:
-                text_repair = [text[0], def_delay, def_delay_type, [def_sound_begin, def_sound]]
+                text_repair = [text[0], def_delay, def_delay_type, [def_sound_begin, def_sound, def_sound_begin_wait, def_sound_wait]]
                 for x in range(1, len(text)):
                     if type(text[x]) == int or type(text[x]) == float:
                         text_repair[1] = text[x]
                     elif type(text[x]) == bool:
                         text_repair[2] = text[x]
+                    # sound repair
                     elif type(text[x]) == list:
-                        if len(text[x]) == 2 and type(text[x][0]) == str and type(text[x][1]) == str:
-                            text_repair[3] = text[x]
-                        elif len(text[x]) == 1 and type(text[x][0]) == str:
-                            text_repair[3][1] = text[x][0]
+                        sound_var = False
+                        sound_b_wait_var = False
+                        for var in text[x]:
+                            if type(var) == str:
+                                if not sound_var:
+                                    text_repair[3][1] = var
+                                    sound_var = True
+                                else:
+                                    text_repair[3][0] = var
+                            elif type(var) == bool:
+                                if not sound_b_wait_var:
+                                    text_repair[3][2] = var
+                                    sound_b_wait_var = True
+                                else:
+                                    text_repair[3][3] = var
                 text = text_repair
             # not all sounds
-            if len(text[3]) != 2:
-                if len(text[3]) == 1 and type(text[3][0]) == str:
-                            text[3] = [def_sound_begin, text[3][0]]
-                else:
-                    text[3] = [def_sound_begin, def_sound]
+            if len(text[3]) == 0:
+                text[3] = [def_sound_begin, def_sound, def_sound_begin_wait, def_sound_wait]
+            elif len(text[3]) > 0:
+                sound_repair = [def_sound_begin, def_sound, def_sound_begin_wait, def_sound_wait]
+                sound_num = 0
+                sounds = []
+                sound_b_wait_var = False
+                for var in text[3]:
+                    if type(var) == str:
+                        sounds.append(var)
+                        sound_num += 1
+                    elif type(var) == bool:
+                        if not sound_b_wait_var:
+                            sound_repair[2] = var
+                            sound_b_wait_var = True
+                        else:
+                            sound_repair[3] = var
+                if sound_num == 1:
+                    sound_repair[1] = sounds[0]
+                elif sound_num != 0:
+                    sound_repair[0] = sounds[0]
+                    sound_repair[1] = sounds[1]
+                text[3] = sound_repair
             # begin sound + typewriter
             if text[3][0] != "":
                 from simpleaudio import WaveObject
-                WaveObject.from_wave_file(text[3][0]).play()
-            _typewriter_line(text[0], text[1], text[2], text[3][1])
+                cur_sound = WaveObject.from_wave_file(text[3][0]).play()
+                if text[3][2]:
+                    cur_sound.wait_done()
+            _typewriter_line(text[0], text[1], text[2], text[3][1], text[3][3])
         else:
             print("TEXT ERROR!")
     return ""
@@ -196,5 +235,5 @@ def _test_run():
 
 # -231822330	sentance(2, 2)
 # _test_run()
-# typewriter(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav"]])
+# typewriter(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav", False, True]])
 # input()
