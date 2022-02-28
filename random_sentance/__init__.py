@@ -151,7 +151,9 @@ def typewriter(*texts):
     def_sound_wait = False
     for text in texts:
         # empty
-        if text != []:
+        if text == [] or type(text[0]) != str:
+            print("TEXT ERROR!")
+        else:
             # only text
             if len(text) == 1:
                 text = [text[0], def_delay, def_delay_type, [def_sound_begin, def_sound, def_sound_begin_wait, def_sound_wait]]
@@ -212,8 +214,6 @@ def typewriter(*texts):
                 if text[3][2]:
                     cur_sound.wait_done()
             _typewriter_line(text[0], text[1], text[2], text[3][1], text[3][3])
-        else:
-            print("TEXT ERROR!")
     return ""
 
 
