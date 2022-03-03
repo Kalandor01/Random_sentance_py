@@ -2,7 +2,7 @@
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
 It also contains a function for writing text out letter by letter at a specifiable speed and with a custom sound.
 """
-__version__ = '1.3.2.1'
+__version__ = '1.4'
 
 from numpy import random as npr
 # exposed for custom seed
@@ -98,8 +98,12 @@ def structured_sentance(min_len=1, max_len=100):
         -who
 """
 
-def _typewriter_line(text="", delay=4, is_delay_per_letter=True, sound="", sound_waits=False):
+
+
+
+def _typewriter_line_legacy(text="", delay=4, is_delay_per_letter=True, sound="", sound_waits=False):
     """
+    THIS SCRIPT HAS BEEN DEPRECATED BY THE TYPEWRITER OBJECT!!!
     Writes out text like a typewriter with end="".\n
     Returns "" so it can be easily inserted into text.\n
     Delay controlls how many millisecond it should wait between writing out two letters.\n
@@ -127,8 +131,9 @@ def _typewriter_line(text="", delay=4, is_delay_per_letter=True, sound="", sound
     return ""
         
 
-def typewriter(*texts):
+def _typewriter_legacy(*texts):
     """
+    THIS SCRIPT HAS BEEN DEPRECATED BY THE TYPEWRITER OBJECT!!!\n
     Can write out multiline texts letter by letter. (using the typewriter function)\n
     Accepts n number of lists each contaning a text that can have an int delay, a bool delay type and a string sound name.\n
     [TEXT, DELAY, IS_DELAY_PER_LETTER, [SOUND_BEGIN, SOUND, SOUND_BEGIN_WAIT, SOUND_WAIT]]\n
@@ -213,24 +218,33 @@ def typewriter(*texts):
                 cur_sound = WaveObject.from_wave_file(text[3][0]).play()
                 if text[3][2]:
                     cur_sound.wait_done()
-            _typewriter_line(text[0], text[1], text[2], text[3][1], text[3][3])
+            _typewriter_line_legacy(text[0], text[1], text[2], text[3][1], text[3][3])
     return ""
 
 
-def typewriter_oop(*texts):
+
+
+def typewriter(*texts):
+    """
+    Accepts n number of Typewriter objects, or a list of typewriter objects and prints them out.\n
+    Returns "" so it can be inserted into a print.\n
+    """
     texts = [x for x in texts]
+    if len(texts) == 1 and type(texts[0]) != Typewriter:
+        texts = texts[0]
     for text in texts:
-        # begin sound + typewriter
-        if text.sound_begin != "":
-            from simpleaudio import WaveObject
-            cur_sound = WaveObject.from_wave_file(text.sound_begin).play()
-            if text.sound_begin_wait:
-                cur_sound.wait_done()
-        _typewriter_line(text.text, text.delay, text.delay_type, text.sound, text.sound_wait)
+        text.write()
     return ""
 
 
 class Typewriter():
+    """
+    Object for writing out text letter-by-letter with a lot of controll.\n
+    delay controlls how many millisecond it should wait between writing out two letters.\n
+    If is_delay_per_letter is False, delay is how many seconds it should take to write out the entire text.\n
+    sound and sound_begin are paths to .wav files. sound_begin will play before the text starts printing out and sound will play every time a letter is printed.\n
+    Both sound variables have a bool that controlls if the function should wait for the sound to finnish playing before continuing.
+    """
     def __init__(self, text, delay=4, delay_type=True, sound_begin="", sound="", sound_begin_wait=False, sound_wait=False):
         self.text = str(text)
         self.delay = int(delay)
@@ -239,6 +253,37 @@ class Typewriter():
         self.sound = str(sound)
         self.sound_begin_wait = bool(sound_begin_wait)
         self.sound_wait = bool(sound_wait)
+    
+
+    def write(self):
+        """
+        Writes out the text with the settings from the object, and returns "" so it can be easily used in a print.
+        """
+        # imports
+        from time import sleep
+        # sound?
+        if self.sound != "" or self.sound_begin != "":
+            from simpleaudio import WaveObject
+        # begin sound
+        if self.sound_begin != "":
+            b_sound = WaveObject.from_wave_file(self.sound_begin).play()
+            if self.sound_begin_wait:
+                b_sound.wait_done()
+        # typewriter
+        for x in range(len(self.text)):
+            print(self.text[x], end="", flush=True)
+            if x != len(self.text) - 1:
+                # sound
+                if self.sound != "":
+                    mid_sound = WaveObject.from_wave_file(self.sound).play()
+                    if self.sound_wait:
+                        mid_sound.wait_done()
+                # delay type
+                if self.delay_type:
+                    sleep(self.delay / 1000)
+                else:
+                    sleep(self.delay / len(self.text))
+        return ""
 
 
 def _test_run():
@@ -252,15 +297,17 @@ def _test_run():
 
     ans = input("Random?(Y/N): ")
     if ans.upper() == "Y":
-        typewriter(unstructured_random(1, 1000), 5)
+        typewriter(Typewriter(unstructured_random(1, 1000), 5))
     else:
-        typewriter(structured_sentance(1, 100), 5)
+        typewriter(Typewriter(structured_sentance(1, 100), 5))
     input()
 
 # -231822330	sentance(2, 2)
 # _test_run()
-# typewriter(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav", False, True]])
-# t1 = Typewriter("jjjjjjjjjjjjjjjjjjjjjjjjjjjj\n", delay_type=False)
-# t2 = Typewriter("hhhhhhhhhhhhhhhhhhhhhhhhh", 4)
-# typewriter_oop(t1, t2)
+# typewriter_legacy(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav", False, True]])
+# t1 = Typewriter("Hello!\nWellcome!\nGood Morning!\n", 1, False)
+# t1.write()
+# t2 = Typewriter("How are...", 1, False, "sound.wav")
+# t3 = Typewriter("YOU!!!\n", 1.5, False, sound="enter.wav", sound_wait=True)
+# typewriter(t2, t3)
 # input()
