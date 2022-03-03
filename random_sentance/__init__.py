@@ -125,7 +125,7 @@ def _typewriter_line(text="", delay=4, is_delay_per_letter=True, sound="", sound
             else:
                 sleep(delay / len(text))
     return ""
-
+        
 
 def typewriter(*texts):
     """
@@ -217,6 +217,30 @@ def typewriter(*texts):
     return ""
 
 
+def typewriter_oop(*texts):
+    texts = [x for x in texts]
+    for text in texts:
+        # begin sound + typewriter
+        if text.sound_begin != "":
+            from simpleaudio import WaveObject
+            cur_sound = WaveObject.from_wave_file(text.sound_begin).play()
+            if text.sound_begin_wait:
+                cur_sound.wait_done()
+        _typewriter_line(text.text, text.delay, text.delay_type, text.sound, text.sound_wait)
+    return ""
+
+
+class Typewriter():
+    def __init__(self, text, delay=4, delay_type=True, sound_begin="", sound="", sound_begin_wait=False, sound_wait=False):
+        self.text = str(text)
+        self.delay = int(delay)
+        self.delay_type = bool(delay_type)
+        self.sound_begin = str(sound_begin)
+        self.sound = str(sound)
+        self.sound_begin_wait = bool(sound_begin_wait)
+        self.sound_wait = bool(sound_wait)
+
+
 def _test_run():
     seed = r.randint(0, 1000000000)
     ans = input("Seed?: ")
@@ -236,4 +260,7 @@ def _test_run():
 # -231822330	sentance(2, 2)
 # _test_run()
 # typewriter(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav", False, True]])
+# t1 = Typewriter("jjjjjjjjjjjjjjjjjjjjjjjjjjjj\n", delay_type=False)
+# t2 = Typewriter("hhhhhhhhhhhhhhhhhhhhhhhhh", 4)
+# typewriter_oop(t1, t2)
 # input()
