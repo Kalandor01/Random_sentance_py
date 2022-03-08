@@ -2,8 +2,9 @@
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
 It also contains a function for writing text out letter by letter at a specifiable speed and with a custom sound.
 """
-__version__ = '1.4'
+__version__ = '1.4.1'
 
+from re import T
 from numpy import random as npr
 # exposed for custom seed
 r = npr.RandomState()
@@ -108,18 +109,24 @@ def _typewriter_line_legacy(text="", delay=4, is_delay_per_letter=True, sound=""
     Returns "" so it can be easily inserted into text.\n
     Delay controlls how many millisecond it should wait between writing out two letters.\n
     If is_delay_per_letter is False, delay is how many seconds it should take to write out the entire text.\n
-    You can also specify a sound that will play every time a letter is printed, and specify if the function should wait until the sound finishes before writing a new letter.
+    You can also specify a sound that will play every time a letter is printed, and specify if the function should wait until the sound finishes before writing a new letter.\n
+    If the simpleaudio module is not avalible it will write ann error message.
     """
     from time import sleep
     # sound?
     if sound != "":
-        from simpleaudio import WaveObject
+        sound_error = False
+        try:
+            from simpleaudio import WaveObject
+        except ModuleNotFoundError:
+            print("\nSimpleaudio module not found!!!\n")
+            sound_error = True
     
     for x in range(len(text)):
         print(text[x], end="", flush=True)
         if x != len(text) - 1:
             # sound
-            if sound != "":
+            if sound != "" and not sound_error:
                 curr_sound = WaveObject.from_wave_file(sound).play()
                 if sound_waits:
                     curr_sound.wait_done()
@@ -144,7 +151,8 @@ def _typewriter_legacy(*texts):
     sound and sound_begin are paths to .wav files. sound_begin will play before the text starts printing out and sound will play every time a letter is printed.\n
     Both sound variables have a bool that controlls if the function should wait for the sound to finnish playing before continuing.\n
     If the array with the sounds only has one sound path, the function will asume that it is the sound variable.\n
-    If it only has one bool it asumes that it is for the begin sound variable.
+    If it only has one bool it asumes that it is for the begin sound variable.\n
+    If the simpleaudio module is not avalible it will write ann error message.
     """
     texts = [x for x in texts]
     # defaults
@@ -214,10 +222,15 @@ def _typewriter_legacy(*texts):
                 text[3] = sound_repair
             # begin sound + typewriter
             if text[3][0] != "":
-                from simpleaudio import WaveObject
-                cur_sound = WaveObject.from_wave_file(text[3][0]).play()
-                if text[3][2]:
-                    cur_sound.wait_done()
+                try:
+                    from simpleaudio import WaveObject
+                except ModuleNotFoundError:
+                    print("\nSimpleaudio module not found!!!\n")
+                    text[3][1] = ""
+                else:
+                    cur_sound = WaveObject.from_wave_file(text[3][0]).play()
+                    if text[3][2]:
+                        cur_sound.wait_done()
             _typewriter_line_legacy(text[0], text[1], text[2], text[3][1], text[3][3])
     return ""
 
@@ -243,9 +256,10 @@ class Typewriter():
     delay controlls how many millisecond it should wait between writing out two letters.\n
     If is_delay_per_letter is False, delay is how many seconds it should take to write out the entire text.\n
     sound and sound_begin are paths to .wav files. sound_begin will play before the text starts printing out and sound will play every time a letter is printed.\n
-    Both sound variables have a bool that controlls if the function should wait for the sound to finnish playing before continuing.
+    Both sound variables have a bool that controlls if the function should wait for the sound to finnish playing before continuing.\n
+    If the simpleaudio module is not avalible the sound will not play (by deffault).
     """
-    def __init__(self, text, delay=4, delay_type=True, sound_begin="", sound="", sound_begin_wait=False, sound_wait=False):
+    def __init__(self, text, delay=4, delay_type=True, sound_begin="", sound="", sound_begin_wait=False, sound_wait=False, write_warning=False):
         self.text = str(text)
         self.delay = int(delay)
         self.delay_type = bool(delay_type)
@@ -253,6 +267,7 @@ class Typewriter():
         self.sound = str(sound)
         self.sound_begin_wait = bool(sound_begin_wait)
         self.sound_wait = bool(sound_wait)
+        self.write_warning = bool(write_warning)
     
 
     def write(self):
@@ -263,9 +278,15 @@ class Typewriter():
         from time import sleep
         # sound?
         if self.sound != "" or self.sound_begin != "":
-            from simpleaudio import WaveObject
+            sound_error = False
+            try:
+                from simpleaudio import WaveObject
+            except ModuleNotFoundError:
+                if self.write_warning:
+                    print("\nSimpleaudio module not found!!!\n")
+                sound_error = True
         # begin sound
-        if self.sound_begin != "":
+        if self.sound_begin != "" and not sound_error:
             b_sound = WaveObject.from_wave_file(self.sound_begin).play()
             if self.sound_begin_wait:
                 b_sound.wait_done()
@@ -274,7 +295,7 @@ class Typewriter():
             print(self.text[x], end="", flush=True)
             if x != len(self.text) - 1:
                 # sound
-                if self.sound != "":
+                if self.sound != "" and not sound_error:
                     mid_sound = WaveObject.from_wave_file(self.sound).play()
                     if self.sound_wait:
                         mid_sound.wait_done()
@@ -304,7 +325,7 @@ def _test_run():
 
 # -231822330	sentance(2, 2)
 # _test_run()
-# typewriter_legacy(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav", False, True]])
+# _typewriter_legacy(["Hello!\nWellcome!\nGood Morning!\n", 1, False], ["How are...", 1, False, ["sound.wav", ""]], ["YOU!!!\n", 1.5, False, ["enter.wav", False, True]])
 # t1 = Typewriter("Hello!\nWellcome!\nGood Morning!\n", 1, False)
 # t1.write()
 # t2 = Typewriter("How are...", 1, False, "sound.wav")
