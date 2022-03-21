@@ -3,4 +3,5 @@ It also contains an object for writing text out letter by letter at a specifiabl
 
 WARNING
 For sounds Microsoft Visual C++ 14.0 or greater is REQUIRED.
+https://visualstudio.microsoft.com/visual-cpp-build-tools/
 You can ONLY install the "dev" version if you have that.
