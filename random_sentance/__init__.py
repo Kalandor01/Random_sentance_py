@@ -4,7 +4,6 @@ It also contains a function for writing text out letter by letter at a specifiab
 """
 __version__ = '1.4.1'
 
-from re import T
 from numpy import random as npr
 # exposed for custom seed
 r = npr.RandomState()
