@@ -2,17 +2,19 @@
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
 It also contains a function for writing text out letter by letter at a specifiable speed and with a custom sound.
 """
-__version__ = '1.4'
+__version__ = '1.4.1'
 
 from numpy import random as npr
 # exposed for custom seed
 r = npr.RandomState()
 
-def unstructured_random(min_len=1, max_len=1000):
+def unstructured_random(min_len=1, max_len=1000, letters=None):
     """
-    Returns a random number of random letters (and simbols).
+    Returns a random number of random letters (and simbols).\n
+    A characterset can be passed in as an array of characters to use.
     """
-    letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ]
+    if letters == None:
+        letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ' ]
     text = ""
     num = r.randint(min_len, max_len + 1)
     for _ in range(num):
