@@ -2,7 +2,7 @@
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
 It also contains a function for writing text out letter by letter at a specifiable speed and with a custom sound.
 """
-__version__ = '1.5.1'
+__version__ = '1.4.99'
 
 from numpy import random as npr
 # exposed for custom seed
