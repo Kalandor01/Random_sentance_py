@@ -2,7 +2,7 @@
 This module can generate sentances with a random length from a range of words, or just a bunch of random letters.\n
 It also contains a function for writing text out letter by letter at a specifiable speed and with a custom sound.
 """
-__version__ = '1.5'
+__version__ = '1.5.1'
 
 from numpy import random as npr
 # exposed for custom seed
@@ -10,22 +10,33 @@ r = npr.RandomState()
 
 # dictionarry
 W_NOUN = [" this", " that", " car", " cat", " ice cream", " building", " house", " freezer", " doll", " art", " computer", " code", " table", " chair", " mouse", " keyboard", " monitor", " processor", " ram", " fruit", " vegetable", " desk", " pen", " pencil", " gun", " death", " paint", " brush", " shoe", " pants", " shirt", " glasses", " glass", " nose", " hair", " head", " eye", " leg", "arm", " sofa", " brain", " neuron", " dog", " parrot", " snake", " python", " hamster", " bird", " mamal", " human", " robot", " AI", " pig", " horse", " reptile", " box", " knee", " shoulder", " toe", " finger", " lamp", " rock", " mountain", " gease", " swan", " boulder", " spear", " phone", " letter", " word", " sentance", " board", " plane", " helicopter", " rocket", " space ship", " space station", " suit", " space suit", " sand", " concrete", " steel", " fire", " engine", " gas", " liquid", " water", " lava", " magma", " volcano", " universe", " galaxy", " star", " wood", " oxygen", " hydrogen", " door", " lazer", " Earth", " hat", " ball", " globe", " sphere", " Sun", " Europe", " Amerika", " moon", " city", " bridge", " village", " fuel", " explosion", " root", " tree", " plastic", " gold", " money", " diamond", " teeth", " glue", " medal", " cup"]
-W_PRONOUN = [" I", " you", " he", " she", " it", " they", " them", " me", " we", " us"]
-W_VERB = [" eat", " give", " take", " do", " make", " destroy", " code", " can", " slap", " kick", " leave", " go", " morn", " capture", " run", " walk", " jog", " climb", " move", " sense", " hear", " see", " taste", " lick", " die", " answer", " fight", " traver", " touch", " feel", " live", " become", " pray", " cry", " clap", " think", " kill", " build", " laugh", " train", " excercierse", " read", " teach", " count", " begin", " bend", " break", " drink", " disapear", " shout", " transform", " finish", " restart", " imagine", " create", " lift", " bounce", " fall", " reach"]
+W_PRONOUN = [[" I am", " I was", " I will be", " I"], [" you are", " you were", " you will be", " you"], [" he is", " he was", " he will be", " he"], [" she is", " she was", " she will be", " she"], [" it is", " it was", " it will be", " it"], [" they are", " they were", " they will be", " they"], " them", " me", [" we are", " we were", " we will be", " we"], " us"]
+W_VERB = [[" eating", " ate", " eating", " eat"], [" giving", " gave", " giving", " give"], " take", " do", " make", " destroy", " code", " can", " slap", " kick", " leave", " go", " morn", " capture", " run", " walk", " jog", " climb", " move", " sense", " hear", " see", " taste", " lick", " die", " answer", " fight", " traver", " touch", " feel", " live", " become", " pray", " cry", " clap", " think", " kill", " build", " laugh", " train", " excercierse", " read", " teach", " count", " begin", " bend", " break", " drink", " disapear", " shout", " transform", " finish", " restart", " imagine", " create", " lift", " bounce", " fall", " reach"]
 W_ADJECTIVE = [" a", " an", " the", " cute", " nice", " wrong", " medium", " big", " small", " hairy", " fat", " fast", " slow", " easy", " hard", " blue", " red", " green", " white", " black", " tall", " short", " wide", " thin", " angry", " happy", " sad", " growling", " surprised", " moved", " transparrent", " soft", " golden", " tough", " conductive", " light", " heavy", " pale", " matt", " shiny", " hungry", " full", " missing", " found", " interesting", " broken", " fixed", " trapped", " freed", " free", " boring", " automatic", " dramatic", " horifying", " agrovating", " stupid", " smart", " dumb"]
 W_ADVERB = [" then", " quickly", " slowly", " now", " soon", " lately", " easily", " surprisingly", " accidentaly", " worryingly", " gently", " extremely", " carefully", " well", " amazingly", " totaly", " acrobaticly"]
 
 
 W_ASK = [" who", " when", " why", " where", " what", " are", " is"]
-W_END = [".", "!", "?", "?!", "!?", " :)", " :(", " :D", " :C", " XD", "", "..."]
-W_END_QUESTION = ["?", "?!", "!?"]
 W_BETWEEN = [" is", " with", " at", " on", " in", " are", " have"]
-WORDS = [W_NOUN, W_PRONOUN, W_VERB, W_ADJECTIVE, W_ADVERB, W_ASK, W_BETWEEN, W_END, W_END_QUESTION]
-#                      0         1       2         3         4        5        6       (7)    (8)      (9)
-#                     noun    pronoun   verb   adjective   adverb     ask    between   end  end_ask  beginning
-SENTANCE_STRUCTURE = [[2, 6], [2, 6], [0, 2, 6], [0, 1], [2, 3, 4], [3, 6], [0, 2, 3], [-2], [-1], [0, 1, 2, 3, 4, 5]]
-ENDING_WORD = [0, 2]
-# extra: 1, 
+W_END = [".", "!", "?", "?!", "!?", " :)", " :(", " :D", " :C", " XD", "", "..."]
+W_END_ASK = ["?", "?!", "!?"]
+
+WORDS = {"noun": W_NOUN, "pronoun": W_PRONOUN, "verb": W_VERB, "adjective": W_ADJECTIVE, "adverb": W_ADVERB, "ask": W_ASK, "between": W_BETWEEN, "end": W_END, "end_ask": W_END_ASK}
+
+SENTANCE_STRUCTURE = {
+"noun": ["verb", "between"],
+"pronoun": ["verb", "between"],
+"verb": ["noun", "verb", "between"],
+"adjective": ["noun"],
+"adverb": ["verb", "adjective", "adverb"],
+"ask": ["adjective", "between"],
+"between": ["noun", "verb", "adjective"],
+"end": ["end"],
+"end_ask": ["end_ask"],
+"beginning": ["noun", "pronoun", "verb", "adjective", "adverb", "ask"]}
+ENDING_WORD = ["noun", "verb"]
+# present, past, future, continous
+SENTANCE_TIMES = [0, 1, 2, 3]
 
 
 def unstructured_random(min_len=1, max_len=1000, letters=None):
@@ -42,9 +53,9 @@ def unstructured_random(min_len=1, max_len=1000, letters=None):
     return text
 
 
-def _get_next_word(previous_type=0):
+def _get_next_word(previous_type:str, sentance_type=0):
     """
-    Returns the next random word, and it's type from the previous word type, according to the sentance structure array, and a 2D array of posible WORDS.
+    Returns the next random word, and it's type from the previous word type, according to the sentance structure array, and an array of posible words.
     """
     # next word type
     type_num = r.randint(0, len(SENTANCE_STRUCTURE[previous_type]))
@@ -52,6 +63,11 @@ def _get_next_word(previous_type=0):
     # next word
     word = WORDS[word_type][r.randint(0, len(WORDS[word_type]))]
     # input(f"{previous_type} {word_type}: {word}")
+    if type(word) == list:
+        if len(word) >= sentance_type + 1:
+            word = word[sentance_type]
+        else:
+            word = word[0]
     return word_type, word
 
 
@@ -61,7 +77,7 @@ def structured_sentance(min_len=1, max_len=100, end_on_good_word=True):
     A Word length of 1 produces only a punctuation mark. (0 produces nothing)\n
     If end_on_good_word is True, the sentance will not end until the word type is an ending word.
     """
-
+    sentance_type = SENTANCE_TIMES[r.randint(0, len(SENTANCE_TIMES))]
     text = "" 
     sentance_length = r.randint(min_len, max_len + 1)
     # nothing
@@ -70,20 +86,22 @@ def structured_sentance(min_len=1, max_len=100, end_on_good_word=True):
         beginning_word = -1
         if sentance_length > 1:
             # beggining
-            previous_type, word = _get_next_word(len(SENTANCE_STRUCTURE) - 1)
+            previous_type, word = _get_next_word("beginning", sentance_type)
             beginning_word = previous_type
-            text += word.replace(" ", "").capitalize()
+            if word[0] == " ":
+                word = word[1:]
+            text += word.capitalize()
             # words
             curr_word_num = 0
             while curr_word_num < sentance_length - 2 or (not previous_type in ENDING_WORD and end_on_good_word):
                 curr_word_num += 1
-                previous_type, word = _get_next_word(previous_type)
+                previous_type, word = _get_next_word(previous_type, sentance_type)
                 text += word
         # end
-        if beginning_word == 5:
-            text += _get_next_word(len(SENTANCE_STRUCTURE) - 2)[1]
+        if beginning_word == "ask":
+            text += _get_next_word("end_ask")[1]
         else:
-            text += _get_next_word(len(SENTANCE_STRUCTURE) - 3)[1]
+            text += _get_next_word("end")[1]
     return text
 
 
@@ -206,8 +224,9 @@ def _test_run():
         typewriter(Typewriter(structured_sentance(1, 100), 5))
     input()
 
-for _ in range(100):
-    Typewriter((structured_sentance(1, 10) + "\n\n")).write()
+# for _ in range(100):
+#     Typewriter((structured_sentance(2, 10) + "\n\n")).write()
+
 # -231822330	sentance(2, 2)
 # _test_run()
 # t1 = Typewriter("Hello!\nWellcome!\nGood Morning!\n", 1, False)
